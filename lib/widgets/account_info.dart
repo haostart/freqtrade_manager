@@ -1,0 +1,221 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/api_service.dart';
+import 'custom_app_bar.dart';
+import 'dart:async';
+
+class AccountInfo extends StatefulWidget {
+  const AccountInfo({super.key});
+
+  @override
+  State<AccountInfo> createState() => _AccountInfoState();
+}
+
+class _AccountInfoState extends State<AccountInfo> {
+  late Future<Map<String, dynamic>> _accountInfo;
+  bool _autoRefresh = false;
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _accountInfo = _fetchAccountInfo();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _handleAutoRefreshToggle(bool? value) {
+    setState(() {
+      _autoRefresh = value ?? false;
+    });
+    
+    _refreshTimer?.cancel();
+    
+    if (_autoRefresh) {
+      _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+        setState(() {
+          _accountInfo = _fetchAccountInfo();
+        });
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchAccountInfo() async {
+    final apiService = Provider.of<ApiService>(context, listen: false);
+    return apiService.getAccountInfo();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: '账户信息',
+        autoRefresh: _autoRefresh,
+        onToggleAutoRefresh: _handleAutoRefreshToggle,
+      ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _accountInfo,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('获取账户信息失败: ${snapshot.error}'));
+          }
+
+          final accountInfo = snapshot.data;
+          if (accountInfo == null) {
+            return const Center(child: Text('无账户信息'));
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                _accountInfo = _fetchAccountInfo();
+              });
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '账户总览',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const Divider(),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildBalanceItem(
+                                '总资产',
+                                '${_formatNumber(accountInfo['__summary__']?['total'])} ${accountInfo['__summary__']?['stake_currency'] ?? 'USDT'}',
+                                fiatValue: '${_formatNumber(accountInfo['__summary__']?['total_value'])} ${accountInfo['__summary__']?['fiat_currency']}',
+                              ),
+                            ),
+                            Expanded(
+                              child: _buildBalanceItem(
+                                '机器人持仓',
+                                '${_formatNumber(accountInfo['__summary__']?['total_bot'])} USDT',
+                                fiatValue: '${_formatNumber(accountInfo['__summary__']?['total_bot_value'])} ${accountInfo['__summary__']?['fiat_currency']}',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildBalanceItem(
+                                '初始资金',
+                                '${_formatNumber(accountInfo['__summary__']?['starting_capital'])} ${accountInfo['__summary__']?['stake_currency'] ?? 'USDT'}',
+                                fiatValue: '${_formatNumber(accountInfo['__summary__']?['starting_capital_fiat'])} ${accountInfo['__summary__']?['fiat_currency']}',
+                              ),
+                            ),
+                            Expanded(
+                              child: _buildBalanceItem(
+                                '收益率',
+                                '${_formatNumber(accountInfo['__summary__']?['profit_pct'])}%',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '货币余额',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const Divider(),
+                        ...accountInfo.entries.where((entry) => entry.key != '__summary__').map((entry) {
+                          final currency = entry.key;
+                          final balance = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  currency,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildBalanceItem('可用', _formatNumber(balance['free'])),
+                                    ),
+                                    Expanded(
+                                      child: _buildBalanceItem('质押金额', _formatNumber(balance['est_stake'])),
+                                    ),
+                                    Expanded(
+                                      child: _buildBalanceItem('总额', _formatNumber(balance['total'])),
+                                    ),
+                                  ],
+                                ),
+                                if ((balance['bot_owned'] ?? 0) > 0)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      '机器人持有: ${_formatNumber(balance['bot_owned'])}',
+                                      style: const TextStyle(color: Colors.blue),
+                                    ),
+                                  ),
+                                const Divider(),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBalanceItem(String label, String value, {String? fiatValue}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(value),
+        if (fiatValue != null)
+          Text(
+            fiatValue,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _formatNumber(dynamic number) {
+    if (number == null) return '0.00';
+    return number.toStringAsFixed(2);
+  }
+} 
