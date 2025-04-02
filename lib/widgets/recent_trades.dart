@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import 'package:intl/intl.dart';
 import 'custom_app_bar.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RecentTrades extends StatefulWidget {
   const RecentTrades({super.key});
@@ -61,7 +62,7 @@ class RecentTradesState extends State<RecentTrades> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '最近交易',
+        title: AppLocalizations.of(context)!.recentTrades,
         autoRefresh: autoRefresh,
         onToggleAutoRefresh: _toggleAutoRefresh,
       ),
@@ -73,12 +74,12 @@ class RecentTradesState extends State<RecentTrades> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('获取交易记录失败: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)!.getTradesFailed(snapshot.error.toString())));
           }
 
           final trades = snapshot.data;
           if (trades == null || trades.isEmpty) {
-            return const Center(child: Text('无交易记录'));
+            return Center(child: Text(AppLocalizations.of(context)!.noTrades));
           }
 
           return RefreshIndicator(
@@ -120,7 +121,7 @@ class RecentTradesState extends State<RecentTrades> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            isShort ? '做空' : '做多',
+                            isShort ? AppLocalizations.of(context)!.short : AppLocalizations.of(context)!.long,
                             style: TextStyle(
                               color: isShort ? Colors.red : Colors.green,
                               fontSize: 12,
@@ -130,9 +131,9 @@ class RecentTradesState extends State<RecentTrades> {
                       ],
                     ),
                     subtitle: Text(
-                      '开仓时间: ${DateFormat('MM-dd HH:mm').format(openTime)}\n'
-                      '${closeTime != null ? '平仓时间: ${DateFormat('MM-dd HH:mm').format(closeTime)}' : '持仓中'}\n'
-                      '开仓价: ${trade['open_rate']}, 平仓价: ${trade['close_rate'] ?? '未平仓'}',
+                      '${AppLocalizations.of(context)!.openTime}: ${DateFormat('MM-dd HH:mm').format(openTime)}\n'
+                      '${closeTime != null ? '${AppLocalizations.of(context)!.closeTime}: ${DateFormat('MM-dd HH:mm').format(closeTime)}' : AppLocalizations.of(context)!.open}\n'
+                      '${AppLocalizations.of(context)!.openPrice}: ${trade['open_rate']}, ${AppLocalizations.of(context)!.closePrice}: ${trade['close_rate'] ?? AppLocalizations.of(context)!.notClosed}',
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),

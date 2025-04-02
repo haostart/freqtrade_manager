@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import 'custom_app_bar.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RecentLogs extends StatefulWidget {
   const RecentLogs({super.key});
@@ -58,7 +59,7 @@ class RecentLogsState extends State<RecentLogs> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '最近日志',
+        title: AppLocalizations.of(context)!.recentLogs,
         autoRefresh: autoRefresh,
         onToggleAutoRefresh: _toggleAutoRefresh,
       ),
@@ -70,12 +71,12 @@ class RecentLogsState extends State<RecentLogs> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('获取日志失败: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)!.getLogsFailed(snapshot.error.toString())));
           }
 
           final logs = snapshot.data;
           if (logs == null || logs.isEmpty) {
-            return const Center(child: Text('无日志记录'));
+            return Center(child: Text(AppLocalizations.of(context)!.noLogs));
           }
 
           return RefreshIndicator(

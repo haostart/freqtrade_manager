@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import 'custom_app_bar.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountInfo extends StatefulWidget {
   const AccountInfo({super.key});
@@ -51,9 +52,11 @@ class _AccountInfoState extends State<AccountInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: CustomAppBar(
-        title: '账户信息',
+        title: localizations.accountInfo,
         autoRefresh: _autoRefresh,
         onToggleAutoRefresh: _handleAutoRefreshToggle,
       ),
@@ -61,16 +64,16 @@ class _AccountInfoState extends State<AccountInfo> {
         future: _accountInfo,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: Text(localizations.loading));
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('获取账户信息失败: ${snapshot.error}'));
+            return Center(child: Text('${localizations.error}: ${snapshot.error}'));
           }
 
           final accountInfo = snapshot.data;
           if (accountInfo == null) {
-            return const Center(child: Text('无账户信息'));
+            return Center(child: Text(localizations.noData));
           }
 
           return RefreshIndicator(
@@ -89,7 +92,7 @@ class _AccountInfoState extends State<AccountInfo> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '账户总览',
+                          localizations.accountOverview,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const Divider(),
@@ -97,14 +100,14 @@ class _AccountInfoState extends State<AccountInfo> {
                           children: [
                             Expanded(
                               child: _buildBalanceItem(
-                                '总资产',
+                                localizations.totalAssets,
                                 '${_formatNumber(accountInfo['__summary__']?['total'])} ${accountInfo['__summary__']?['stake_currency'] ?? 'USDT'}',
                                 fiatValue: '${_formatNumber(accountInfo['__summary__']?['total_value'])} ${accountInfo['__summary__']?['fiat_currency']}',
                               ),
                             ),
                             Expanded(
                               child: _buildBalanceItem(
-                                '机器人持仓',
+                                localizations.botHoldings,
                                 '${_formatNumber(accountInfo['__summary__']?['total_bot'])} USDT',
                                 fiatValue: '${_formatNumber(accountInfo['__summary__']?['total_bot_value'])} ${accountInfo['__summary__']?['fiat_currency']}',
                               ),
@@ -116,14 +119,14 @@ class _AccountInfoState extends State<AccountInfo> {
                           children: [
                             Expanded(
                               child: _buildBalanceItem(
-                                '初始资金',
+                                localizations.initialCapital,
                                 '${_formatNumber(accountInfo['__summary__']?['starting_capital'])} ${accountInfo['__summary__']?['stake_currency'] ?? 'USDT'}',
                                 fiatValue: '${_formatNumber(accountInfo['__summary__']?['starting_capital_fiat'])} ${accountInfo['__summary__']?['fiat_currency']}',
                               ),
                             ),
                             Expanded(
                               child: _buildBalanceItem(
-                                '收益率',
+                                localizations.profitRate,
                                 '${_formatNumber(accountInfo['__summary__']?['profit_pct'])}%',
                               ),
                             ),
@@ -141,7 +144,7 @@ class _AccountInfoState extends State<AccountInfo> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '货币余额',
+                          localizations.currencyBalance,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const Divider(),
@@ -161,13 +164,13 @@ class _AccountInfoState extends State<AccountInfo> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: _buildBalanceItem('可用', _formatNumber(balance['free'])),
+                                      child: _buildBalanceItem(localizations.available, _formatNumber(balance['free'])),
                                     ),
                                     Expanded(
-                                      child: _buildBalanceItem('质押金额', _formatNumber(balance['est_stake'])),
+                                      child: _buildBalanceItem(localizations.stakedAmount, _formatNumber(balance['est_stake'])),
                                     ),
                                     Expanded(
-                                      child: _buildBalanceItem('总额', _formatNumber(balance['total'])),
+                                      child: _buildBalanceItem(localizations.total, _formatNumber(balance['total'])),
                                     ),
                                   ],
                                 ),
@@ -175,7 +178,7 @@ class _AccountInfoState extends State<AccountInfo> {
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text(
-                                      '机器人持有: ${_formatNumber(balance['bot_owned'])}',
+                                      '${localizations.botOwned}: ${_formatNumber(balance['bot_owned'])}',
                                       style: const TextStyle(color: Colors.blue),
                                     ),
                                   ),

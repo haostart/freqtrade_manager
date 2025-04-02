@@ -11,6 +11,7 @@ import '../widgets/recent_trades.dart';
 import '../widgets/recent_logs.dart';
 import '../widgets/profit_summary.dart';
 import '../widgets/daily_profit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -76,20 +77,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _logout() async {
+    final localizations = AppLocalizations.of(context)!;
     // 显示确认对话框
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认退出'),
-        content: const Text('确定要退出登录吗？'),
+        title: Text(localizations.logout),
+        content: Text(localizations.confirmLogout),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(localizations.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
+            child: Text(localizations.confirm),
           ),
         ],
       ),
@@ -109,18 +111,20 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('退出失败: $e')),
+        SnackBar(content: Text('${localizations.logoutFailed}: $e')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
           builder: (context) => Tooltip(
-            message: '打开导航菜单',
+            message: localizations.openMenu,
             child: IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
@@ -129,11 +133,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        title: const Text('账号交易信息'),
+        title: Text(localizations.accountInfo),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           Tooltip(
-            message: '退出登录',
+            message: localizations.logout,
             child: IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _logout,
@@ -144,12 +148,12 @@ class _HomeScreenState extends State<HomeScreen> {
               _pageController.jumpToPage(value); // 跳转到选定的页面
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 0, child: Text('账号信息')),
-              const PopupMenuItem(value: 1, child: Text('开放交易')),
-              const PopupMenuItem(value: 2, child: Text('最近交易')),
-              const PopupMenuItem(value: 3, child: Text('最近日志')),
-              const PopupMenuItem(value: 4, child: Text('利润摘要')),
-              const PopupMenuItem(value: 5, child: Text('每日利润')),
+              PopupMenuItem(value: 0, child: Text(localizations.accountInfo)),
+              PopupMenuItem(value: 1, child: Text(localizations.openTrades)),
+              PopupMenuItem(value: 2, child: Text(localizations.recentTrades)),
+              PopupMenuItem(value: 3, child: Text(localizations.recentLogs)),
+              PopupMenuItem(value: 4, child: Text(localizations.profitSummary)),
+              PopupMenuItem(value: 5, child: Text(localizations.dailyProfit)),
             ],
           ),
         ],

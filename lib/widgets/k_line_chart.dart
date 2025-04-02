@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class KLineChart extends StatefulWidget {
   final List<Map<String, dynamic>>? trades;
@@ -58,7 +59,7 @@ class KLineChartState extends State<KLineChart> {
       // 增加超时时间到60秒
       return await apiService.getKLineData(pair: 'BTCUSDT', interval: '1h')
           .timeout(const Duration(seconds: 60), onTimeout: () {
-        throw TimeoutException('获取K线数据超时，请检查网络连接');
+        throw TimeoutException(AppLocalizations.of(context)!.getKLineDataTimeout);
       });
     } catch (e) {
       print('获取K线数据失败: $e');
@@ -130,6 +131,7 @@ class KLineChartState extends State<KLineChart> {
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
     final isMobile = size.width < 600;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Container(
@@ -141,16 +143,16 @@ class KLineChartState extends State<KLineChart> {
               future: _kLineData,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: Text(l10n.loading));
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text('获取 K 线数据失败: ${snapshot.error}'));
+                  return Center(child: Text('${l10n.getKLineDataFailed}${snapshot.error}'));
                 }
 
                 final kLineData = snapshot.data;
                 if (kLineData == null || kLineData.isEmpty) {
-                  return const Center(child: Text('无 K 线数据'));
+                  return Center(child: Text(l10n.noKLineData));
                 }
 
                 List<FlSpot> spots = [];

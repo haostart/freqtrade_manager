@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../screens/trade_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/settings_screen.dart';
 import '../providers/auth_provider.dart';
 import '../services/storage_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -27,6 +29,8 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -35,19 +39,19 @@ class AppDrawer extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
             ),
-            child: const Text(
-              '交易菜单',
-              style: TextStyle(
+            child: Text(
+              localizations.appTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
               ),
             ),
           ),
           Tooltip(
-            message: '查看账户信息和当前交易',
+            message: localizations.viewAccountInfo,
             child: ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('账户概览'),
+              title: Text(localizations.marketData),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
@@ -57,10 +61,10 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
           Tooltip(
-            message: '查看实时行情数据',
+            message: localizations.viewMarketData,
             child: ListTile(
               leading: const Icon(Icons.candlestick_chart),
-              title: const Text('交易行情'),
+              title: Text(localizations.trading),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
@@ -71,10 +75,23 @@ class AppDrawer extends StatelessWidget {
           ),
           const Divider(),
           Tooltip(
-            message: '退出当前账号',
+            message: localizations.appSettings,
+            child: ListTile(
+              leading: const Icon(Icons.settings),
+              title: Text(localizations.settings),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+            ),
+          ),
+          Tooltip(
+            message: localizations.logoutTooltip,
             child: ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('退出登录'),
+              title: Text(localizations.logout),
               onTap: () => _logout(context),
             ),
           ),

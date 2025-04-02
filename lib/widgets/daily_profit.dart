@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import 'dart:async';
 import 'custom_app_bar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DailyProfit extends StatefulWidget {
   const DailyProfit({super.key});
@@ -56,7 +57,7 @@ class DailyProfitState extends State<DailyProfit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '每日收益',
+        title: AppLocalizations.of(context)!.dailyProfit,
         autoRefresh: autoRefresh,
         onToggleAutoRefresh: _toggleAutoRefresh,
       ),
@@ -68,12 +69,12 @@ class DailyProfitState extends State<DailyProfit> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('获取每日数据失败: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)!.getDailyDataFailed(snapshot.error.toString())));
           }
 
           final data = snapshot.data;
           if (data == null || data.isEmpty) {
-            return const Center(child: Text('无每日数据'));
+            return Center(child: Text(AppLocalizations.of(context)!.noDailyData));
           }
           final dailyList = List<Map<String, dynamic>>.from(data['data']);
           return RefreshIndicator(
@@ -109,7 +110,7 @@ class DailyProfitState extends State<DailyProfit> {
                                 ),
                               ),
                               Text(
-                                '交易次数: $tradeCount',
+                                '${AppLocalizations.of(context)!.tradeCount}: $tradeCount',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey,

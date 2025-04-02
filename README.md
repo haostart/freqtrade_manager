@@ -1,87 +1,87 @@
 # Freqtrade Manager
 
-一个基于 Flutter 开发的 Freqtrade 交易管理客户端应用。
+A Flutter-based client application for managing Freqtrade trading.
 
-## 功能特点
+## Features
 
-### 1. 用户认证
-- 安全的登录/退出系统
-- 凭证安全存储
-- 会话管理
+### 1. User Authentication
+- Secure login/logout system
+- Credential secure storage
+- Session management
 
-### 2. 市场数据
-- 实时 K 线图表展示
-- 交易数据可视化
-- 自动数据刷新（30秒间隔）
-- 手动刷新功能
+### 2. Market Data
+- Real-time candlestick chart display
+- Trading data visualization
+- Automatic data refresh (30-second interval)
+- Manual refresh capability
 
-### 3. 交易管理
-- 查看开放交易
-- 交易操作界面
-- 实时交易状态更新
+### 3. Trading Management
+- View open trades
+- Trading operation interface
+- Real-time trade status updates
 
-### 4. 系统功能
-- Material Design 3 界面设计
-- 响应式布局
-- 深色/浅色主题支持
-- 通知服务
-- 可配置侧边栏
+### 4. System Features
+- Material Design 3 interface
+- Responsive layout
+- Dark/Light theme support
+- Notification service
+- Configurable sidebar
 
-## 技术栈
+## Tech Stack
 
 - Flutter
-- Provider 状态管理
-- SharedPreferences 本地存储
+- Provider state management
+- SharedPreferences local storage
 - Material Design 3
-- RESTful API 集成
+- RESTful API integration
 
-## 项目结构
+## Project Structure
 
 ```
 lib/
-├── main.dart              # 应用入口
-├── screens/              # 页面界面
-├── services/             # 服务层
-├── widgets/              # 可复用组件
-├── models/               # 数据模型
-└── providers/            # 状态管理
+├── main.dart              # Application entry
+├── screens/              # Screen interfaces
+├── services/             # Service layer
+├── widgets/              # Reusable components
+├── models/               # Data models
+└── providers/            # State management
 ```
 
-## 开发环境要求
+## Development Requirements
 
 - Flutter SDK
 - Dart SDK
 - Android Studio / VS Code
 - Git
 
-## 安装和运行
+## Installation and Running
 
-1. 克隆项目
+1. Clone the project
 ```bash
-git clone [项目地址]
+git clone [project-url]
 ```
 
-2. 安装依赖
+2. Install dependencies
 ```bash
 flutter pub get
 ```
 
-3. 运行项目
+3. Run the project
 ```bash
 flutter run
 ```
 
-## 配置说明
+## Configuration Guide
 
-1. API 配置
-   - 在设置中配置 Freqtrade API 地址
-   - 设置 API 密钥
+1. API Configuration
+   - Configure Freqtrade API address in settings
+   - Set up API keys
 
-2. 通知设置
-   - 配置交易通知
-   - 设置提醒方式
+2. Notification Settings
+   - Configure trading notifications
+   - Set up reminder methods
 
-## 贡献指南
+## Contributing
 
-欢迎提交 Issue 和 Pull Request 来帮助改进项目。
+Issues and Pull Requests are welcome to help improve the project.
 

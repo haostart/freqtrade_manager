@@ -7,6 +7,7 @@ import '../services/api_service.dart';
 import '../screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TradeScreen extends StatefulWidget {
   const TradeScreen({super.key});
@@ -65,13 +66,53 @@ class _TradeScreenState extends State<TradeScreen> {
     }
   }
 
+  void _logout() async {
+    final localizations = AppLocalizations.of(context)!;
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.logout),
+        content: Text(localizations.confirmLogout),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(localizations.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(localizations.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || confirm != true) return;
+
+    try {
+      await StorageService.clearCredentials();
+      if (!mounted) return;
+      context.read<AuthProvider>().logout();
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${localizations.logoutFailed}: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
           builder: (context) => Tooltip(
-            message: '打开导航菜单',
+            message: localizations.openMenu,
             child: IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
@@ -80,11 +121,11 @@ class _TradeScreenState extends State<TradeScreen> {
             ),
           ),
         ),
-        title: const Text('交易行情'),
+        title: Text(localizations.trading),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           Tooltip(
-            message: '刷新数据',
+            message: localizations.refresh,
             child: IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
@@ -93,18 +134,10 @@ class _TradeScreenState extends State<TradeScreen> {
             ),
           ),
           Tooltip(
-            message: '退出登录',
+            message: localizations.logout,
             child: IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await StorageService.clearCredentials();
-                if (!mounted) return;
-                context.read<AuthProvider>().logout();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
-                );
-              },
+              onPressed: _logout,
             ),
           ),
         ],

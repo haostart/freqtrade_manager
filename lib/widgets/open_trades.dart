@@ -6,6 +6,7 @@ import 'custom_app_bar.dart'; // 导入 CustomAppBar
 import 'package:flutter/services.dart'; // 导入 SystemChrome 所需的库
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OpenTrades extends StatefulWidget {
   const OpenTrades({super.key});
@@ -89,14 +90,14 @@ class OpenTradesState extends State<OpenTrades> {
           
           _flutterLocalNotificationsPlugin.show(
             1,
-            '当前交易收益率: $profit%',
-            '收益金额: $profitAbs USDT',
+            AppLocalizations.of(context)!.currentTradeProfit(profit),
+            AppLocalizations.of(context)!.profitAmount(profitAbs),
             NotificationDetails(android: androidPlatformChannelSpecifics),
           );
         }
       }
     }).catchError((error) {
-      print('获取当前交易失败: $error');
+      print(AppLocalizations.of(context)!.getCurrentTradeFailed(error));
     });
   }
 
@@ -146,7 +147,7 @@ class OpenTradesState extends State<OpenTrades> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '开仓时间: ${trade['open_date']}',
+                    '${AppLocalizations.of(context)!.openTime}: ${trade['open_date']}',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],
@@ -167,25 +168,25 @@ class OpenTradesState extends State<OpenTrades> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow('交易ID', trade['trade_id'].toString()),
-                _buildInfoRow('方向', trade['is_short'] ? '做空' : '做多'),
-                _buildInfoRow('杠杆', '${trade['leverage']}x'),
-                _buildInfoRow('数量', trade['amount'].toString()),
-                _buildInfoRow('开仓价格', trade['open_rate'].toString()),
-                _buildInfoRow('当前价格', trade['current_rate'].toString()),
-                _buildInfoRow('止损价格', trade['stop_loss_abs'].toString()),
-                _buildInfoRow('清算价格', trade['liquidation_price'].toString()),
-                _buildInfoRow('策略', trade['strategy']),
-                _buildInfoRow('进场标签', trade['enter_tag']),
+                _buildInfoRow(AppLocalizations.of(context)!.tradeId, trade['trade_id'].toString()),
+                _buildInfoRow(AppLocalizations.of(context)!.direction, trade['is_short'] ? AppLocalizations.of(context)!.short : AppLocalizations.of(context)!.long),
+                _buildInfoRow(AppLocalizations.of(context)!.leverage, '${trade['leverage']}x'),
+                _buildInfoRow(AppLocalizations.of(context)!.amount, trade['amount'].toString()),
+                _buildInfoRow(AppLocalizations.of(context)!.openPrice, trade['open_rate'].toString()),
+                _buildInfoRow(AppLocalizations.of(context)!.currentPrice, trade['current_rate'].toString()),
+                _buildInfoRow(AppLocalizations.of(context)!.stopLoss, trade['stop_loss_abs'].toString()),
+                _buildInfoRow(AppLocalizations.of(context)!.liquidationPrice, trade['liquidation_price'].toString()),
+                _buildInfoRow(AppLocalizations.of(context)!.strategy, trade['strategy']),
+                _buildInfoRow(AppLocalizations.of(context)!.enterTag, trade['enter_tag']),
                 
                 const Divider(),
-                const Text('订单历史:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(AppLocalizations.of(context)!.orderHistory, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ..._buildOrdersList(trade['orders']),
                 
                 const Divider(),
-                _buildInfoRow('收益金额', '${trade['profit_abs']} USDT'),
-                _buildInfoRow('资金费率', '${trade['funding_fees']} USDT'),
-                _buildInfoRow('总收益', '${trade['total_profit_abs']} USDT'),
+                _buildInfoRow(AppLocalizations.of(context)!.profit, '${trade['profit_abs']} USDT'),
+                _buildInfoRow(AppLocalizations.of(context)!.fundingFees, '${trade['funding_fees']} USDT'),
+                _buildInfoRow(AppLocalizations.of(context)!.totalProfit, '${trade['total_profit_abs']} USDT'),
               ],
             ),
           ),
@@ -222,20 +223,20 @@ class OpenTradesState extends State<OpenTrades> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('订单ID: ${order['order_id']}'),
+                  Text('${AppLocalizations.of(context)!.orderId}: ${order['order_id']}'),
                   Text(
                     status,
                     style: TextStyle(color: statusColor),
                   ),
                 ],
               ),
-              Text('类型: ${order['order_type']}'),
-              Text('方向: ${order['ft_order_side']}'),
-              Text('数量: ${order['amount']}'),
-              Text('价格: ${order['safe_price']}'),
+              Text('${AppLocalizations.of(context)!.type}: ${order['order_type']}'),
+              Text('${AppLocalizations.of(context)!.direction}: ${order['ft_order_side']}'),
+              Text('${AppLocalizations.of(context)!.amount}: ${order['amount']}'),
+              Text('${AppLocalizations.of(context)!.price}: ${order['safe_price']}'),
               if (order['ft_order_tag'] != null)
-                Text('标签: ${order['ft_order_tag']}'),
-              Text('时间: ${order['order_timestamp']}'),
+                Text('${AppLocalizations.of(context)!.tag}: ${order['ft_order_tag']}'),
+              Text('${AppLocalizations.of(context)!.time}: ${order['order_timestamp']}'),
             ],
           ),
         ),
@@ -245,12 +246,19 @@ class OpenTradesState extends State<OpenTrades> {
 
   @override
   Widget build(BuildContext context) {
-    _updateStatusBar(); // 在构建时更新状态栏
+    _updateStatusBar();
     return Scaffold(
       appBar: CustomAppBar(
-        title: '当前交易',
+        title: AppLocalizations.of(context)!.openTrades,
         autoRefresh: autoRefresh,
         onToggleAutoRefresh: _toggleAutoRefresh,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: refreshTrades,
+            tooltip: AppLocalizations.of(context)!.refresh,
+          ),
+        ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _futureTrades,
@@ -258,24 +266,15 @@ class OpenTradesState extends State<OpenTrades> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (snapshot.hasError) {
-            return Center(child: Text('获取当前交易失败: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)!.error));
           }
-
-          final trades = snapshot.data;
-          if (trades == null || trades.isEmpty) {
-            return const Center(child: Text('无当前交易'));
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text(AppLocalizations.of(context)!.noData));
           }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              refreshTrades();
-            },
-            child: ListView.builder(
-              itemCount: trades.length,
-              itemBuilder: (context, index) => _buildTradeCard(trades[index]),
-            ),
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) => _buildTradeCard(snapshot.data![index]),
           );
         },
       ),
